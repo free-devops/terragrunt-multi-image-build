@@ -1,0 +1,23 @@
+name: terragrunt apply
+env:
+  TF_VAR_username: ${{ secrets.DOCKERHUB_USERNAME }}
+  TF_VAR_password: ${{ secrets.DOCKERHUB_TOKEN }}
+on:
+  push:
+    branches:
+      - 'master'
+      - 'develop'
+jobs:
+  terragrunt:
+    runs-on: ubuntu-latest
+    container: freedevops/docker:latest
+    steps:
+      - uses: actions/checkout@v2    
+      - name: terragrunt init      
+        run: terragrunt run-all init --terragrunt-exclude-dir . --terragrunt-non-interactive
+      - name: terragrunt validate
+        run: terragrunt run-all validate --terragrunt-exclude-dir .
+      - name: terragrunt plan
+        run: terragrunt run-all plan -out plan.out --terragrunt-exclude-dir .
+      - name: terragunt apply
+        run: terragrunt run-all apply plan.out --terragrunt-non-interactive  --terragrunt-exclude-dir .

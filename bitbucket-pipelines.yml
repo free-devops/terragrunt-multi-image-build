@@ -1,0 +1,19 @@
+# Docker image
+image: freedevops/docker
+
+# Definitions
+definitions:
+  steps:
+    - step: &deploy
+        services:
+            - docker
+        script:
+          - terragrunt run-all init --terragrunt-exclude-dir .
+          - terragrunt run-all validate --terragrunt-exclude-dir .
+          - terragrunt run-all plan -out plan.out --terragrunt-exclude-dir .
+          - terragrunt run-all apply plan.out --terragrunt-non-interactive  --terragrunt-exclude-dir .
+pipelines:
+  branches:
+    master:
+          - step:
+              <<: *deploy
